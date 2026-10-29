@@ -1,0 +1,33 @@
+
+import Foundation
+
+@MainActor
+final class UsersViewModel {
+
+    private let service: UserService
+
+    private(set) var users: [User] = []
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
+
+    var onUpdate: (() -> Void)?
+
+    init(service: UserService = UserService()) {
+        self.service = service
+    }
+
+    func fetchUsers() async {
+        isLoading = true
+        errorMessage = nil
+        onUpdate?()
+
+        do {
+            users = try await service.fetchUsers()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+        onUpdate?()
+    }
+}

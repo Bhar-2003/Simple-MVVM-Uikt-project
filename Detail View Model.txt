@@ -1,0 +1,38 @@
+
+import Foundation
+
+@MainActor
+final class UserDetailViewModel {
+
+    private let service: UserService
+    private let userID: Int
+
+    private(set) var user: User?
+    private(set) var isLoading = false
+    private(set) var errorMessage: String?
+
+    var onUpdate: (() -> Void)?
+
+    init(
+        userID: Int,
+        service: UserService = UserService()
+    ) {
+        self.userID = userID
+        self.service = service
+    }
+
+    func fetchUserDetails() async {
+        isLoading = true
+        errorMessage = nil
+        onUpdate?()
+
+        do {
+            user = try await service.fetchUser(id: userID)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isLoading = false
+        onUpdate?()
+    }
+}
